@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo
+    environment:
+      MONGO_USERNAME: '${MONGO_USERNAME}'
+      MONGO_PASSWORD: '${MONGO_PASSWORD}'
+    ports:
+      - '${MONGODB_PORT}:27017'
+  redis:
+    image: redis
+    ports:
+      - '${REDIS_PORT}:6379'
