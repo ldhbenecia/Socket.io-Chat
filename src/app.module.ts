@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ChatModule } from './chat/chat.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ChatModule } from './chat/chat.module';
       url: process.env.REDIS_URI,
     }),
     ChatModule,
+    UserModule,
   ],
 })
 export class AppModule {}
