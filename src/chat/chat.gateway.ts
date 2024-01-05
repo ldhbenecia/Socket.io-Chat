@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import {
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -10,11 +11,10 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatRoomService } from './chat-room/chat-room.service';
 
-@WebSocketGateway(80, { namespace: 'chat-room' })
-@WebSocketGateway({ path: '/chat', cors: { origin: '*' } })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+@WebSocketGateway(80)
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  private readonly logger = new Logger('Chat-room');
+  private readonly logger = new Logger('Chat');
 
   constructor(private readonly chatRoomService: ChatRoomService) {}
 
@@ -47,5 +47,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const chatRoom = await this.chatRoomService.createChatRoom(name, participants);
 
     this.server.emit('Created new ChatRoom', chatRoom);
+  }
+
+  // message Test
+  @SubscribeMessage('newMessage')
+  onNewMessage(client: Socket, @MessageBody() body: any) {
+    console.log(body);
+    this.server.emit('onMessage', {
+      msg: 'New Message',
+      sender: client,
+      content: body,
+    });
   }
 }
