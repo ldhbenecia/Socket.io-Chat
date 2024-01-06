@@ -10,13 +10,17 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatRoomService } from './chat-room/chat-room.service';
+import { ChatMessageService } from './chat-message/chat-message.service';
 
 @WebSocketGateway(80)
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private readonly logger = new Logger('Chat');
 
-  constructor(private readonly chatRoomService: ChatRoomService) {}
+  constructor(
+    private readonly chatRoomService: ChatRoomService,
+    private readonly chatMessageService: ChatMessageService,
+  ) {}
 
   afterInit() {
     this.logger.log('WebSocket initialized 80 ✅');
@@ -58,5 +62,31 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       sender: client,
       content: body,
     });
+  }
+
+  // 메시지 전송
+  @SubscribeMessage('sendMessage')
+  async onSendMessage(client: Socket, @MessageBody() payload: { roomId: string; contents: string }): Promise<void> {
+    const { roomId, contents } = payload;
+
+    // 메시지를 저장하고
+    const message = await this.chatMessageService.saveMessage(roomId, client.id, contents);
+
+    // 같은 채팅방의 모든 클라이언트에게 메시지 전송
+    this.server.to(roomId).emit('message', {
+      sender: client.id,
+      contents: message.contents,
+      timeStamp: message.timestamp,
+    });
+  }
+
+  // 채팅방의 메시지 불러오기
+  @SubscribeMessage('getMessages')
+  async onGetMessages(client: Socket, @MessageBody() payload: { roomId: string }): Promise<void> {
+    const { roomId } = payload;
+
+    // 채팅방의 모든 메시지를 불러오고 클라이언트에게 전송
+    const messages = await this.chatMessageService.getMessages(roomId);
+    client.emit('messages', messages);
   }
 }
