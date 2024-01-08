@@ -4,10 +4,10 @@ import mongoose, { HydratedDocument } from 'mongoose';
 export type ChatRoomDocument = HydratedDocument<ChatRoom>;
 
 // 240104 ldhbenecia || 클래스 사용
-@Schema()
+@Schema({ collection: 'chatrooms' })
 export class ChatRoom {
   @Prop({ required: true })
-  name: string;
+  roomName: string;
 
   @Prop({ required: true, type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
   participants: mongoose.Schema.Types.ObjectId[];

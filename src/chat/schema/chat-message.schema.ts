@@ -4,7 +4,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 export type ChatMessageDocument = HydratedDocument<ChatMessage>;
 
 // 240104 ldhbenecia || 클래스 사용
-@Schema()
+@Schema({ collection: 'chatmessages' })
 export class ChatMessage {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ChatRoom' })
   roomId: mongoose.Schema.Types.ObjectId;
@@ -13,9 +13,9 @@ export class ChatMessage {
   senderId: mongoose.Schema.Types.ObjectId;
 
   @Prop({ required: true })
-  contents: string;
+  content: string;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, default: Date.now })
   timestamp: Date;
 }
 

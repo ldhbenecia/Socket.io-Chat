@@ -6,4 +6,4 @@ export const UserSchema = new mongoose.Schema({
   chatRooms: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ChatRoom' }],
 });
 
-export const User = mongoose.model('User', UserSchema);
+export const User = mongoose.model('User', UserSchema, 'users');
