@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ChatGateway } from './chat.gateway';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ChatMessageSchema, ChatRoomSchema } from './schema';
+import { ChatGateway } from './chat.gateway';
+import { ChatRoomSchema, ChatMessageSchema, ChatRoom, ChatMessage } from './schema';
 import { ChatRoomService } from './chat-room/chat-room.service';
 import { ChatRoomRepository } from './chat-room/chat-room.repository';
 import { ChatMessageRepository } from './chat-message/chat-message.repository';
@@ -9,8 +9,8 @@ import { ChatMessageService } from './chat-message/chat-message.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'ChatRoom', schema: ChatRoomSchema }]),
-    MongooseModule.forFeature([{ name: 'ChatMessage', schema: ChatMessageSchema }]),
+    MongooseModule.forFeature([{ name: ChatRoom.name, schema: ChatRoomSchema }]),
+    MongooseModule.forFeature([{ name: ChatMessage.name, schema: ChatMessageSchema }]),
   ],
   providers: [ChatGateway, ChatRoomService, ChatRoomRepository, ChatMessageService, ChatMessageRepository],
 })
