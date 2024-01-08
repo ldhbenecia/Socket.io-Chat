@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -12,10 +13,15 @@ import { Server, Socket } from 'socket.io';
 import { ChatRoomService } from './chat-room/chat-room.service';
 import { ChatMessageService } from './chat-message/chat-message.service';
 
-@WebSocketGateway(80)
+@WebSocketGateway({
+  namespace: 'chat',
+  cors: {
+    origin: ['http://localhost:4000'], // Client
+  },
+})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  private readonly logger = new Logger('Chat');
+  private readonly logger = new Logger('ChatGateway');
 
   constructor(
     private readonly chatRoomService: ChatRoomService,
@@ -23,69 +29,56 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ) {}
 
   afterInit() {
-    this.logger.log('WebSocket initialized 80 ✅');
+    this.logger.log('WebSocket initialized 3000/chat ✅');
   }
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
-    client.emit('welcome', 'Welcome to the chat room!');
-    this.server.emit('userConnected', `${client.id} joined the chat`);
+    client.broadcast.emit('message', {
+      message: `${client.id}가 들어왔습니다.`,
+    });
   }
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
-    this.server.emit('userDisconnected', `${client.id} left the chat`);
   }
+
+  // 1:1 채팅방 생성
+  @SubscribeMessage('createPrivateRoom')
+  async handleCreatePrivateRoom(client: Socket, @MessageBody() roomName: string): Promise<void> {
+    await this.chatRoomService.createPrivateChatRoom(client.id, roomName);
+  }
+
+  // 단체 채팅방 생성
+  // @SubscribeMessage('createRoom')
+  // async handleCreateRoom(client: Socket, payload: { name: string; participants: string[] }): Promise<void> {
+  //   const { name, participants } = payload;
+  //   const chatRoom = await this.chatRoomService.createChatRoom(name, participants);
+
+  //   // 단체 채팅방 생성 메시지 전송
+  //   this.server.emit('Created new ChatRoom', chatRoom);
+  // }
 
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: { roomId: string; message: string }): void {
-    console.log(`Received message from client ${client.id}: ${payload.message}`);
+  async onSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { roomId: string; content: string },
+  ): Promise<void> {
+    const { roomId, content } = payload;
+    const message = await this.chatMessageService.saveMessage(roomId, client.id, content);
 
-    // 같은 채팅방의 모든 클라이언트에게 메시지 전송
-    this.server.to(payload.roomId).emit('message', payload.message);
-  }
-
-  @SubscribeMessage('createRoom')
-  async handleCreateRoom(client: Socket, payload: { name: string; participants: string[] }): Promise<void> {
-    const { name, participants } = payload;
-    const chatRoom = await this.chatRoomService.createChatRoom(name, participants);
-
-    this.server.emit('Created new ChatRoom', chatRoom);
-  }
-
-  // message Test
-  @SubscribeMessage('newMessage')
-  onNewMessage(client: Socket, @MessageBody() body: any) {
-    console.log(body);
-    this.server.emit('onMessage', {
-      msg: 'New Message',
-      sender: client,
-      content: body,
-    });
-  }
-
-  // 메시지 전송
-  @SubscribeMessage('sendMessage')
-  async onSendMessage(client: Socket, @MessageBody() payload: { roomId: string; contents: string }): Promise<void> {
-    const { roomId, contents } = payload;
-
-    // 메시지를 저장하고
-    const message = await this.chatMessageService.saveMessage(roomId, client.id, contents);
-
-    // 같은 채팅방의 모든 클라이언트에게 메시지 전송
-    this.server.to(roomId).emit('message', {
+    // 현재 클라이언트를 제외한 같은 방에 있는 모든 클라이언트에게 메시지 브로드캐스트
+    client.broadcast.to(roomId).emit('message', {
       sender: client.id,
-      contents: message.contents,
+      contents: message.content,
       timeStamp: message.timestamp,
     });
   }
 
-  // 채팅방의 메시지 불러오기
   @SubscribeMessage('getMessages')
   async onGetMessages(client: Socket, @MessageBody() payload: { roomId: string }): Promise<void> {
     const { roomId } = payload;
 
-    // 채팅방의 모든 메시지를 불러오고 클라이언트에게 전송
     const messages = await this.chatMessageService.getMessages(roomId);
     client.emit('messages', messages);
   }
