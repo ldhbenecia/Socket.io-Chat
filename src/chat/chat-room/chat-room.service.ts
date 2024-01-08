@@ -6,13 +6,11 @@ import { ChatRoom } from '../schema';
 export class ChatRoomService {
   constructor(private chatRoomRepository: ChatRoomRepository) {}
 
-  // 단체 채팅방 생성
-  // async createChatRoom(name: string, participants: string[]): Promise<ChatRoom> {
-  //   return this.chatRoomRepository.createChatRoom(name, participants);
-  // }
+  async createChatRoom(userId: string, roomName: string): Promise<ChatRoom> {
+    return await this.chatRoomRepository.createChatRoom(userId, roomName);
+  }
 
-  // 1:1 채팅방 생성
-  async createPrivateChatRoom(userId: string, roomName: string): Promise<ChatRoom> {
-    return await this.chatRoomRepository.createPrivateChatRoom(userId, roomName);
+  async joinChatRoom(userId: string, roomName: string): Promise<ChatRoom> {
+    return await this.chatRoomRepository.joinChatRoom(userId, roomName);
   }
 }
