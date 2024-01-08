@@ -7,8 +7,8 @@ import { Model } from 'mongoose';
 export class ChatMessageRepository {
   constructor(@InjectModel(ChatMessage.name) private chatMessageModel: Model<ChatMessage>) {}
 
-  async saveMessage(roomId: string, senderId: string, content: string): Promise<ChatMessage> {
-    const message = new this.chatMessageModel({ roomId, senderId, content });
+  async saveMessage(roomName: string, senderId: string, content: string): Promise<ChatMessage> {
+    const message = new this.chatMessageModel({ roomName, senderId, content });
     return await message.save();
   }
 
