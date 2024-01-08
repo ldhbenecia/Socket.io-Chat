@@ -41,13 +41,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('createRoom')
-  async handleCreatePrivateRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { roomName: string },
-  ): Promise<void> {
+  async CreateRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { roomName: string }): Promise<void> {
     const { roomName } = data;
     const createdRoom = await this.chatRoomService.createChatRoom(client.id, roomName);
-
+    client.join(roomName);
     this.logger.log(`Client ${client.id} created room: ${createdRoom.roomName}`);
   }
 
