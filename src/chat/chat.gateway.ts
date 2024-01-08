@@ -80,14 +80,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { roomName: string; content: string },
   ): Promise<void> {
-    console.log(payload);
     const { roomName, content } = payload;
-    console.log(roomName, content);
-
     const message = await this.chatMessageService.saveMessage(roomName, client.id, content);
 
     // 현재 클라이언트를 제외한 같은 방에 있는 모든 클라이언트에게 메시지 브로드캐스트
     client.broadcast.to(roomName).emit('message', {
+      roomName: roomName,
       sender: client.id,
       contents: message.content,
       timeStamp: message.timestamp,
