@@ -6,7 +6,7 @@ export type ChatRoomDocument = HydratedDocument<ChatRoom>;
 // 240104 ldhbenecia || 클래스 사용
 @Schema({ collection: 'chatrooms' })
 export class ChatRoom {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   roomName: string;
 
   @Prop({ required: true, type: [String], default: [] })

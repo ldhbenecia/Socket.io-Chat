@@ -1,13 +1,13 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 export type ChatMessageDocument = HydratedDocument<ChatMessage>;
 
 // 240104 ldhbenecia || 클래스 사용
 @Schema({ collection: 'chatmessages' })
 export class ChatMessage {
-  @Prop({ type: String, ref: 'ChatRoom' })
-  roomName: string;
+  @Prop({ type: Types.ObjectId, ref: 'ChatRoom' })
+  roomName: Types.ObjectId;
 
   @Prop({ type: String, ref: 'User' })
   senderId: string;

@@ -53,8 +53,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const { roomName } = payload;
 
     client.join(roomName);
-    this.logger.log(`Client ${client.id} joined room: ${roomName}`);
     await this.chatRoomService.joinChatRoom(client.id, roomName);
+    this.logger.log(`Client ${client.id} joined room: ${roomName}`);
 
     client.broadcast.emit('message', {
       message: `${client.id}가 채팅방에 참여했습니다.`,
@@ -81,6 +81,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ): Promise<void> {
     const { roomName, content } = payload;
     const message = await this.chatMessageService.saveMessage(roomName, client.id, content);
+    //console.log(`Message saved successfully: ${JSON.stringify(message)}`);
 
     // 현재 클라이언트를 제외한 같은 방에 있는 모든 클라이언트에게 메시지 브로드캐스트
     client.broadcast.to(roomName).emit('message', {
@@ -96,6 +97,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const { roomId } = payload;
 
     const messages = await this.chatMessageService.getMessages(roomId);
-    client.emit('messages', messages);
+    console.log(messages);
   }
 }
