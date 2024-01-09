@@ -61,14 +61,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     });
   }
 
-  // message Test
-  @SubscribeMessage('newMessage')
-  onNewMessage(client: Socket, @MessageBody() body: any) {
-    console.log(body);
-    this.server.emit('onMessage', {
-      msg: 'New Message',
-      sender: client,
-      content: body,
+  @SubscribeMessage('leaveRoom')
+  async leaveRoom(@ConnectedSocket() client: Socket, @MessageBody() payload: { roomName: string }): Promise<void> {
+    const { roomName } = payload;
+
+    client.leave(roomName);
+    this.logger.log(`Client ${client.id} left room: ${roomName}`);
+    await this.chatRoomService.leaveChatRoom(client.id, roomName);
+
+    client.broadcast.emit('message', {
+      message: `${client.id}가 채팅방에서 퇴장하셨습니다..`,
     });
   }
 

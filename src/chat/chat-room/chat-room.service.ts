@@ -13,4 +13,8 @@ export class ChatRoomService {
   async joinChatRoom(userId: string, roomName: string): Promise<ChatRoom> {
     return await this.chatRoomRepository.joinChatRoom(userId, roomName);
   }
+
+  async leaveChatRoom(userId: string, roomName: string): Promise<ChatRoom> {
+    return await this.chatRoomRepository.leaveChatRoom(userId, roomName);
+  }
 }

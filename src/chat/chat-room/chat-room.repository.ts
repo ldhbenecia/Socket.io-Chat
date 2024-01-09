@@ -28,4 +28,17 @@ export class ChatRoomRepository {
 
     return await existingRoom.save();
   }
+
+  async leaveChatRoom(userId: string, roomName: string): Promise<ChatRoom> {
+    const existingRoom = await this.chatRoomModel.findOne({ roomName });
+    if (!existingRoom) {
+      throw new ForbiddenException(`Chat room with name ${roomName} does not exist.`);
+    }
+
+    if (existingRoom.participants.includes(userId)) {
+      existingRoom.participants = existingRoom.participants.filter((participantId) => participantId !== userId);
+    }
+
+    return await existingRoom.save();
+  }
 }
