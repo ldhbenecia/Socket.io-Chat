@@ -15,9 +15,7 @@ import { ChatMessageService } from './chat-message/chat-message.service';
 
 @WebSocketGateway({
   namespace: 'chat',
-  cors: {
-    origin: ['http://localhost:4000'], // Client
-  },
+  cors: { origin: ['http://localhost:4000'] },
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
@@ -41,7 +39,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('createRoom')
-  async CreateRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { roomName: string }): Promise<void> {
+  async createRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { roomName: string }): Promise<void> {
     const { roomName } = data;
     const createdRoom = await this.chatRoomService.createChatRoom(client.id, roomName);
     client.join(roomName);
@@ -70,7 +68,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     await this.chatRoomService.leaveChatRoom(client.id, roomName);
 
     client.broadcast.emit('message', {
-      message: `${client.id}가 채팅방에서 퇴장하셨습니다..`,
+      message: `${client.id}가 채팅방에서 퇴장하셨습니다.`,
     });
   }
 
