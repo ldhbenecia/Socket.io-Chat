@@ -10,7 +10,7 @@ export class ChatMessageService {
     return await this.chatMessageRepository.saveMessage(roomName, senderId, content);
   }
 
-  async getMessages(roomId: string): Promise<ChatMessage[]> {
-    return await this.chatMessageRepository.getMessages(roomId);
+  async getMessages(roomName: string): Promise<ChatMessage[]> {
+    return await this.chatMessageRepository.getMessages(roomName);
   }
 }

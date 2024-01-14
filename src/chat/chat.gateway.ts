@@ -91,10 +91,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('getMessages')
-  async onGetMessages(client: Socket, @MessageBody() payload: { roomId: string }): Promise<void> {
-    const { roomId } = payload;
+  async onGetMessages(@ConnectedSocket() client: Socket, @MessageBody() payload: { roomName: string }): Promise<void> {
+    const { roomName } = payload;
 
-    const messages = await this.chatMessageService.getMessages(roomId);
-    console.log(messages);
+    const messages = await this.chatMessageService.getMessages(roomName);
+    client.emit('message', messages);
   }
 }

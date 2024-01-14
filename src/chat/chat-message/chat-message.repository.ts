@@ -12,7 +12,7 @@ export class ChatMessageRepository {
     return await message.save();
   }
 
-  async getMessages(roomId: string): Promise<ChatMessage[]> {
-    return this.chatMessageModel.find({ roomId }).exec();
+  async getMessages(roomName: string): Promise<ChatMessage[]> {
+    return this.chatMessageModel.find({ roomName }).exec();
   }
 }
