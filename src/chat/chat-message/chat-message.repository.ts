@@ -17,11 +17,16 @@ export class ChatMessageRepository {
       throw new NotFoundException(`Chat room '${roomName}' not found`);
     }
 
-    const message = new this.chatMessageModel({ roomName, senderId, content });
+    const message = new this.chatMessageModel({
+      roomId: existingRoom,
+      roomName,
+      senderId,
+      content,
+    });
     return await message.save();
   }
 
   async getMessages(roomName: string): Promise<ChatMessage[]> {
-    return this.chatMessageModel.find({ roomName }).exec();
+    return this.chatMessageModel.find({ roomName }).populate('roomId').exec();
   }
 }
