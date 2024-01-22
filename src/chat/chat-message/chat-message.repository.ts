@@ -17,6 +17,11 @@ export class ChatMessageRepository {
       throw new NotFoundException(`Chat room '${roomName}' not found`);
     }
 
+    // 해당 유저가 채팅방 참가자가 아닌 경우 메세지 전송 불가능 (원활한 개발 진행을 위해 주석 처리)
+    // if (!existingRoom.participants.includes(senderId)) {
+    //   throw new NotFoundException(`User '${senderId}' is not a participant in chat room '${roomName}'`);
+    // }
+
     const message = new this.chatMessageModel({
       roomId: existingRoom,
       roomName,
